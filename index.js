@@ -26,9 +26,16 @@ async function run() {
 		// Connect the client to the server	(optional starting in v4.7)
 		await client.connect();
 
+		const histoTrackDB = client.db("histoTrackDB");
+		const artifactsCollection = histoTrackDB.collection("artifacts");
 
+		// add an artifact
+		app.post("/artifacts", async (req, res) => {
+			const artifact = req.body;
+			const result = await artifactsCollection.insertOne(artifact);
+			res.send(result);
+		});
 
-        
 		// Send a ping to confirm a successful connection
 		await client.db("admin").command({ ping: 1 });
 		console.log("Pinged your deployment. You successfully connected to MongoDB!");
@@ -40,10 +47,10 @@ async function run() {
 run().catch(console.dir);
 
 app.get("/", (req, res) => {
-	res.send("My Histrotrack Server is running!");
+	res.send("My Histotrack Server is running!");
 });
 
 app.listen(port, () => {
-	console.log(`My Histrotrack Server is running on port ${port}`);
+	console.log(`My Histotrack Server is running on port ${port}`);
 	console.log(`http://localhost:${port}`);
 });
