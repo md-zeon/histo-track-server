@@ -28,6 +28,7 @@ async function run() {
 
 		const histoTrackDB = client.db("histoTrackDB");
 		const artifactsCollection = histoTrackDB.collection("artifacts");
+		const likedArtifactsCollection = histoTrackDB.collection("likedArtifacts");
 
 		// get all artifacts
 		app.get("/artifacts", async (req, res) => {
@@ -51,25 +52,33 @@ async function run() {
 			res.send(result);
 		});
 
-		// update like count
+		// update like count and toggle like
 		app.patch("/artifacts/toggle-like/:id", async (req, res) => {
-			const id = req.params.id;
-			const filter = { _id: new ObjectId(id) };
-
-			const artifact = await artifactsCollection.findOne(filter);
-			const { liked } = req.body;
-
-			if (!artifact) {
-				return res.status(404).send({ message: "Artifact not found" });
+			const artifactId = req.params.id;
+			const { email } = req.body;
+			if (!email) {
+				return res.status(400).send({ message: "Email is required" });
 			}
 
-			const updateDoc = {
-				$set: {
-					likes: liked ? artifact.likes + 1 : artifact.likes - 1,
-				},
-			};
-			const result = await artifactsCollection.updateOne(filter, updateDoc);
-			res.send(result);
+			const filter = { _id: new ObjectId(artifactId) };
+
+			const userLikes = await likedArtifactsCollection.findOne({ email });
+			let likedIds = userLikes?.artifactIds || [];
+			const alreadyLiked = likedIds.some((id) => id.toString() === artifactId);
+
+			if (alreadyLiked) {
+				// Unlike
+				likedIds = likedIds.filter((id) => id.toString() !== artifactId);
+				await likedArtifactsCollection.updateOne({ email }, { $set: { artifactIds: likedIds } });
+				await artifactsCollection.updateOne(filter, { $inc: { likes: -1 } });
+				res.send({ liked: false, message: "Artifact disliked" });
+			} else {
+				// Like
+				likedIds.push(new ObjectId(artifactId));
+				await likedArtifactsCollection.updateOne({ email }, { $set: { artifactIds: likedIds } }, { upsert: true });
+				await artifactsCollection.updateOne(filter, { $inc: { likes: 1 } });
+				res.send({ liked: true, message: "Artifact liked" });
+			}
 		});
 
 		// add an artifact
@@ -77,6 +86,25 @@ async function run() {
 			const artifact = req.body;
 			const result = await artifactsCollection.insertOne(artifact);
 			res.send(result);
+		});
+
+        // get liked artifacts
+		app.get("/liked-artifacts", async (req, res) => {
+			const email = req.query.email;
+			if (!email) {
+				return res.status(400).send({ message: "Email is required" });
+			}
+
+			const userLikes = await likedArtifactsCollection.findOne({ email });
+
+			if (!userLikes || !userLikes.artifactIds?.length) {
+				return res.send([]);
+			}
+
+			const objectIds = userLikes.artifactIds.map((id) => new ObjectId(id));
+			const likedArtifacts = await artifactsCollection.find({ _id: { $in: objectIds } }).toArray();
+
+			res.send(likedArtifacts);
 		});
 
 		// Send a ping to confirm a successful connection
