@@ -112,14 +112,23 @@ async function run() {
 			res.send(likedArtifacts);
 		});
 
-        // delete an artifact
-        app.delete("/artifacts/:id", async (req, res) => {
-            const id = req.params.id;
-            const query = { _id: new ObjectId(id) };
-            const result = await artifactsCollection.deleteOne(query);
-            res.send(result);
-        })
+		// delete an artifact
+		app.delete("/artifacts/:id", async (req, res) => {
+			const id = req.params.id;
+			const query = { _id: new ObjectId(id) };
+			const result = await artifactsCollection.deleteOne(query);
+			res.send(result);
+		});
 
+		// update an artifact
+		app.patch("/artifacts/:id", async (req, res) => {
+			const id = req.params.id;
+			const filter = { _id: new ObjectId(id) };
+			const updatedArtifact = req.body;
+			const result = await artifactsCollection.updateOne(filter, { $set: updatedArtifact });
+            res.send(result);
+		});
+        
 		// Send a ping to confirm a successful connection
 		await client.db("admin").command({ ping: 1 });
 		console.log("Pinged your deployment. You successfully connected to MongoDB!");
