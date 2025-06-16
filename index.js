@@ -29,6 +29,13 @@ async function run() {
 		const histoTrackDB = client.db("histoTrackDB");
 		const artifactsCollection = histoTrackDB.collection("artifacts");
 
+        // get all artifacts
+        app.get("/artifacts", async (req, res) => {
+            const cursor = artifactsCollection.find();
+            const result = await cursor.toArray();
+            res.send(result);
+        });
+
 		// add an artifact
 		app.post("/artifacts", async (req, res) => {
 			const artifact = req.body;
