@@ -29,12 +29,19 @@ async function run() {
 		const histoTrackDB = client.db("histoTrackDB");
 		const artifactsCollection = histoTrackDB.collection("artifacts");
 
-        // get all artifacts
-        app.get("/artifacts", async (req, res) => {
-            const cursor = artifactsCollection.find();
-            const result = await cursor.toArray();
-            res.send(result);
-        });
+		// get all artifacts
+		app.get("/artifacts", async (req, res) => {
+			const search = req.query.search;
+			let query = {};
+			if (search) {
+				query = {
+					name: { $regex: search, $options: "i" },
+				};
+			}
+			const cursor = artifactsCollection.find(query);
+			const result = await cursor.toArray();
+			res.send(result);
+		});
 
 		// add an artifact
 		app.post("/artifacts", async (req, res) => {
