@@ -51,6 +51,27 @@ async function run() {
 			res.send(result);
 		});
 
+		// update like count
+		app.patch("/artifacts/toggle-like/:id", async (req, res) => {
+			const id = req.params.id;
+			const filter = { _id: new ObjectId(id) };
+
+			const artifact = await artifactsCollection.findOne(filter);
+			const { liked } = req.body;
+
+			if (!artifact) {
+				return res.status(404).send({ message: "Artifact not found" });
+			}
+
+			const updateDoc = {
+				$set: {
+					likes: liked ? artifact.likes + 1 : artifact.likes - 1,
+				},
+			};
+			const result = await artifactsCollection.updateOne(filter, updateDoc);
+			res.send(result);
+		});
+
 		// add an artifact
 		app.post("/artifacts", async (req, res) => {
 			const artifact = req.body;
