@@ -33,10 +33,15 @@ async function run() {
 		// get all artifacts
 		app.get("/artifacts", async (req, res) => {
 			const search = req.query.search;
+			const email = req.query.email;
 			let query = {};
 			if (search) {
 				query = {
 					name: { $regex: search, $options: "i" },
+				};
+			} else if (email) {
+				query = {
+					adderEmail: email,
 				};
 			}
 			const cursor = artifactsCollection.find(query);
@@ -88,7 +93,7 @@ async function run() {
 			res.send(result);
 		});
 
-        // get liked artifacts
+		// get liked artifacts
 		app.get("/liked-artifacts", async (req, res) => {
 			const email = req.query.email;
 			if (!email) {
