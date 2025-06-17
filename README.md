@@ -9,14 +9,14 @@ This is the backend of the Histo Track project, providing secure API endpoints f
 - RESTful API for Artifacts
 - MongoDB Atlas Integration
 - JWT-based Authentication
-- User Authorization and Role Management
+- User Authorization
 - CORS and Middleware Configurations
 
 ## 🚀 Server Tech Stack
 
 - Node.js
 - Express.js
-- MongoDB & Mongoose
+- MongoDB
 - JSON Web Tokens (JWT)
 - Vercel Deployment
 
