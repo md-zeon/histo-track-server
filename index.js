@@ -21,6 +21,12 @@ const client = new MongoClient(uri, {
 	},
 });
 
+const admin = require("firebase-admin");
+const serviceAccount = require("./firebase-admin-service-key.json");
+admin.initializeApp({
+	credential: admin.credential.cert(serviceAccount),
+});
+
 async function run() {
 	try {
 		// Connect the client to the server	(optional starting in v4.7)
@@ -128,9 +134,9 @@ async function run() {
 			const filter = { _id: new ObjectId(id) };
 			const updatedArtifact = req.body;
 			const result = await artifactsCollection.updateOne(filter, { $set: updatedArtifact });
-            res.send(result);
+			res.send(result);
 		});
-        
+		
 		// Send a ping to confirm a successful connection
 		await client.db("admin").command({ ping: 1 });
 		console.log("Pinged your deployment. You successfully connected to MongoDB!");
