@@ -34,6 +34,8 @@ async function run() {
 		app.get("/artifacts", async (req, res) => {
 			const search = req.query.search;
 			const email = req.query.email;
+			const limit = parseInt(req.query.limit) || 0;
+			const sort = req.query.sort;
 			let query = {};
 			if (search) {
 				query = {
@@ -44,7 +46,7 @@ async function run() {
 					adderEmail: email,
 				};
 			}
-			const cursor = artifactsCollection.find(query);
+			const cursor = artifactsCollection.find(query).sort(sort ? { [sort]: -1 } : {}).limit(limit);
 			const result = await cursor.toArray();
 			res.send(result);
 		});
