@@ -35,7 +35,7 @@ const verifyFirebaseToken = async (req, res, next) => {
 	const token = authHeader.split(" ")[1];
 	try {
 		const decoded = await admin.auth().verifyIdToken(token);
-		console.log("decoded token", decoded);
+		// console.log("decoded token", decoded);
 		req.decoded = decoded;
 		next();
 	} catch (err) {
@@ -71,7 +71,7 @@ async function run() {
 				const token = authHeader.split(" ")[1];
 				try {
 					const decoded = await admin.auth().verifyIdToken(token);
-					console.log("decoded token", decoded);
+					// console.log("decoded token", decoded);
 					req.decoded = decoded;
 				} catch (err) {
 					return res.status(401).send({ message: "Unauthorized access" });
@@ -191,10 +191,10 @@ async function run() {
 run().catch(console.dir);
 
 app.get("/", (req, res) => {
-	res.send("My Histotrack Server is running!");
+	res.send("Histotrack Server is running! It's Time for Artifacts Discovery!");
 });
 
 app.listen(port, () => {
 	console.log(`My Histotrack Server is running on port ${port}`);
-	console.log(`http://localhost:${port}`);
+	// console.log(`http://localhost:${port}`);
 });
