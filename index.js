@@ -27,6 +27,22 @@ admin.initializeApp({
 	credential: admin.credential.cert(serviceAccount),
 });
 
+const verifyFirebaseToken = async (req, res, next) => {
+	const authHeader = req.headers?.authorization;
+	if (!authHeader || !authHeader.startsWith("Bearer ")) {
+		return res.status(401).send({ message: "Unauthorized access" });
+	}
+	const token = authHeader.split(" ")[1];
+	try {
+		const decoded = await admin.auth().verifyIdToken(token);
+		console.log("decoded token", decoded);
+		req.decoded = decoded;
+		next();
+	} catch (err) {
+		return res.status(401).send({ message: "Unauthorized access" });
+	}
+};
+
 async function run() {
 	try {
 		// Connect the client to the server	(optional starting in v4.7)
@@ -48,11 +64,30 @@ async function run() {
 					name: { $regex: search, $options: "i" },
 				};
 			} else if (email) {
+				const authHeader = req.headers?.authorization;
+				if (!authHeader || !authHeader.startsWith("Bearer ")) {
+					return res.status(401).send({ message: "Unauthorized access" });
+				}
+				const token = authHeader.split(" ")[1];
+				try {
+					const decoded = await admin.auth().verifyIdToken(token);
+					console.log("decoded token", decoded);
+					req.decoded = decoded;
+				} catch (err) {
+					return res.status(401).send({ message: "Unauthorized access" });
+				}
+
+				if (email !== req.decoded.email) {
+					return res.status(403).send({ message: "Forbidden access" });
+				}
 				query = {
 					adderEmail: email,
 				};
 			}
-			const cursor = artifactsCollection.find(query).sort(sort ? { [sort]: -1 } : {}).limit(limit);
+			const cursor = artifactsCollection
+				.find(query)
+				.sort(sort ? { [sort]: -1 } : {})
+				.limit(limit);
 			const result = await cursor.toArray();
 			res.send(result);
 		});
@@ -66,11 +101,11 @@ async function run() {
 		});
 
 		// update like count and toggle like
-		app.patch("/artifacts/toggle-like/:id", async (req, res) => {
+		app.patch("/artifacts/toggle-like/:id", verifyFirebaseToken, async (req, res) => {
 			const artifactId = req.params.id;
-			const { email } = req.body;
+			const email = req.decoded.email;
 			if (!email) {
-				return res.status(400).send({ message: "Email is required" });
+				return res.status(403).send({ message: "Forbidden access" });
 			}
 
 			const filter = { _id: new ObjectId(artifactId) };
@@ -95,17 +130,17 @@ async function run() {
 		});
 
 		// add an artifact
-		app.post("/artifacts", async (req, res) => {
+		app.post("/artifacts", verifyFirebaseToken, async (req, res) => {
 			const artifact = req.body;
 			const result = await artifactsCollection.insertOne(artifact);
 			res.send(result);
 		});
 
 		// get liked artifacts
-		app.get("/liked-artifacts", async (req, res) => {
-			const email = req.query.email;
+		app.get("/liked-artifacts", verifyFirebaseToken, async (req, res) => {
+			const email = req.decoded.email;
 			if (!email) {
-				return res.status(400).send({ message: "Email is required" });
+				return res.status(403).send({ message: "Forbidden access" });
 			}
 
 			const userLikes = await likedArtifactsCollection.findOne({ email });
@@ -121,22 +156,30 @@ async function run() {
 		});
 
 		// delete an artifact
-		app.delete("/artifacts/:id", async (req, res) => {
+		app.delete("/artifacts/:id", verifyFirebaseToken, async (req, res) => {
 			const id = req.params.id;
+			const artifact = await artifactsCollection.findOne({ _id: new ObjectId(id) });
+			if (!artifact || artifact.adderEmail !== req.decoded.email) {
+				return res.status(403).send({ message: "Forbidden: You are not the owner of this artifact" });
+			}
 			const query = { _id: new ObjectId(id) };
 			const result = await artifactsCollection.deleteOne(query);
 			res.send(result);
 		});
 
 		// update an artifact
-		app.patch("/artifacts/:id", async (req, res) => {
+		app.patch("/artifacts/:id", verifyFirebaseToken, async (req, res) => {
 			const id = req.params.id;
+			const artifact = await artifactsCollection.findOne({ _id: new ObjectId(id) });
+			if (!artifact || artifact.adderEmail !== req.decoded.email) {
+				return res.status(403).send({ message: "Forbidden: You are not the owner of this artifact" });
+			}
 			const filter = { _id: new ObjectId(id) };
 			const updatedArtifact = req.body;
 			const result = await artifactsCollection.updateOne(filter, { $set: updatedArtifact });
 			res.send(result);
 		});
-		
+
 		// Send a ping to confirm a successful connection
 		await client.db("admin").command({ ping: 1 });
 		console.log("Pinged your deployment. You successfully connected to MongoDB!");
