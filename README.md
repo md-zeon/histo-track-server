@@ -23,8 +23,8 @@ This is the backend of the Histo Track project, providing secure API endpoints f
 ## 📦 Setup
 
 ```bash
-git clone https://github.com/Programming-Hero-Web-Course4/b11a11-server-side-md-zeon.git
-cd histotrack-server-side
+git clone https://github.com/md-zeon/histo-track-server.git
+cd histo-track-server
 npm install
 npm run start
 ```
