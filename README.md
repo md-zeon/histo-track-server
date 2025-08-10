@@ -2,10 +2,21 @@
 
 This is the backend of the Histo Track project, providing secure API endpoints for managing historical artifact data.
 
+---
+
 ## 🌐 Live Website
 
 🔗 **Frontend Live Site**: [https://histo-track.web.app/](https://histo-track.web.app/)  
 🔗 **Backend Live Server API**: [https://histotrack-server.vercel.app/](https://histotrack-server.vercel.app/)
+
+---
+
+## 📦 Repositories
+
+- 🔸 **Client-Side Repository**: [[https://github.com/md-zeon/histo-track-client](https://github.com/md-zeon/histo-track-client)]
+- 🔸 **Server-Side Repository**: [[https://github.com/md-zeon/histo-track-server](https://github.com/md-zeon/histo-track-server)]
+
+---
 
 ## ✨ Features
 
