@@ -40,5 +40,5 @@ This is the backend of the Histo Track project, providing secure API endpoints f
 git clone https://github.com/md-zeon/histo-track-server.git
 cd histo-track-server
 npm install
-npm run start
+npm run start 
 ```
