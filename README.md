@@ -35,6 +35,8 @@ This is the backend of the Histo Track project, providing secure API endpoints f
 - JSON Web Tokens (JWT)
 - Vercel Deployment
 
+---
+
 ## 📦 Setup
 
 ```bash
