@@ -18,6 +18,7 @@ This is the backend of the Histo Track project, providing secure API endpoints f
 
 ---
 
+
 ## ✨ Features
 
 - RESTful API for Artifacts
@@ -30,7 +31,7 @@ This is the backend of the Histo Track project, providing secure API endpoints f
 
 - Node.js
 - Express.js
-- MongoDB
+- MongoDB 
 - JSON Web Tokens (JWT)
 - Vercel Deployment
 
