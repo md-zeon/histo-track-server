@@ -27,6 +27,7 @@ This is the backend of the Histo Track project, providing secure API endpoints f
 - User Authorization
 - CORS and Middleware Configurations
 
+
 ## 🚀 Server Tech Stack
 
 - Node.js
